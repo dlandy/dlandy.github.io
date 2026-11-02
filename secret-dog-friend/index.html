@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Secret Dog Friend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;800&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one narrow column, like a message thread on a phone. A secure-channel header,
+   the anonymous dog's letter on paper, then the translator terminal.
+   Palette: dog-safe. Dogs are dichromats (blue + yellow cones), so everything is built
+   from blues, yellow-oranges and strong light/dark contrast. No red-vs-green anywhere.
+   Deliberately single dark theme, with a big-tech internal-tool feel: deep navy and warehouse orange. */
+:root {
+  --ink: #18222f;        /* page ground, deep navy */
+  --ink-2: #222f3e;      /* raised panel */
+  --line: #37475a;       /* hairlines */
+  --paper: #f3eee2;      /* letter paper */
+  --paper-ink: #1b2430;  /* text on paper */
+  --muted: #9fb0c4;      /* secondary text on ink, blue-grey */
+  --fg: #eef2f7;         /* text on ink */
+  --rust: #ff9f1c;       /* accent: warehouse orange (reads as bright yellow to a dog) */
+  --rust-hover: #ffb547;
+  --rust-dim: #b97416;
+  --ok: #ffd23f;         /* status light: yellow, not green */
+  --sky: #5aa9e6;        /* second dog-visible hue: blue */
+  --display: "Figtree", "Helvetica Neue", Arial, sans-serif;
+  --type: "Courier Prime", "Courier New", Courier, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--fg);
+  font-family: var(--type);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-inline: 16px;
+  padding-block: 20px 56px;
+}
+.wrap { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+.channel {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--line); padding-bottom: 12px;
+}
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 8px; vertical-align: 1px; animation: blink 2.4s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+
+h1 {
+  font-family: var(--display); font-weight: 800; font-size: clamp(2rem, 8vw, 3.1rem);
+  line-height: 1; letter-spacing: -.02em; margin: 0; text-wrap: balance;
+}
+h1 span { color: var(--rust); }
+.sub { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+
+.letter {
+  background: var(--paper); color: var(--paper-ink);
+  padding: 28px 24px 24px; border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.4), 0 18px 40px -20px rgba(0,0,0,.8);
+  transform: rotate(-.4deg);
+}
+.letter p { margin: 0 0 1em; }
+.letter p:last-child { margin-bottom: 0; }
+.redact { background: var(--paper-ink); color: transparent; border-radius: 1px; padding: 0 .2em; user-select: none; }
+.sticker {
+  display: inline-block; font-family: var(--display); font-weight: 800; font-size: 1.05rem;
+  letter-spacing: .02em; padding: 4px 10px; border: 2px solid var(--paper-ink); border-radius: 4px;
+  transform: rotate(-1.5deg); margin: 2px 0;
+}
+.sign { display: flex; align-items: center; gap: 10px; margin-top: 1.4em; font-style: italic; }
+.sign svg { width: 34px; height: 34px; flex: none; }
+
+.terminal {
+  background: var(--ink-2); border: 1px solid var(--line); border-radius: 6px;
+  padding: 22px 20px; display: flex; flex-direction: column; gap: 16px;
+}
+.label { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--rust); margin: 0; }
+h2 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 0; line-height: 1.15; }
+.hint { color: var(--muted); font-size: 14px; margin: 0; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; color: var(--muted); }
+textarea, input[type="text"] {
+  width: 100%; background: var(--ink); color: var(--fg); border: 1px solid var(--line); border-radius: 4px;
+  font-family: var(--type); font-size: 16px; padding: 12px; line-height: 1.5;
+}
+textarea { min-height: 120px; resize: vertical; }
+textarea:focus, input:focus { outline: 2px solid var(--rust); outline-offset: 1px; border-color: transparent; }
+button {
+  font-family: var(--display); font-weight: 800; font-size: 1.05rem; letter-spacing: .01em;
+  background: var(--rust); color: var(--ink); border: 0; border-radius: 4px; padding: 14px 18px; cursor: pointer;
+  align-self: flex-start;
+}
+button:hover { background: var(--rust-hover); }
+button:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+button:disabled { background: var(--rust-dim); cursor: wait; }
+.err { color: var(--rust); font-size: 14px; margin: 0; }
+
+.log { margin: 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+.log li::before { content: "> "; color: var(--rust); }
+.log li.done::after { content: "  ok"; color: var(--ok); }
+.ps { border-top: 1px dashed rgba(27,36,48,.35); padding-top: 1em; margin-top: 1.4em; font-size: 15px; }
+
+.translation { border-left: 3px solid var(--rust); padding-left: 16px; }
+.translation .meta { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--sky); margin: 0 0 10px; }
+.translation p { margin: 0 0 1em; }
+.translation .clue { background: var(--paper); color: var(--paper-ink); padding: 16px; border-radius: 3px; font-style: italic; }
+.yours { font-size: 14px; color: var(--muted); border: 1px dashed var(--line); border-radius: 4px; padding: 10px 12px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.followup { margin-top: 4px; }
+.wipe {
+  margin-top: 20px; background: transparent; color: var(--muted); border: 1px solid var(--line);
+  font-family: var(--type); font-weight: 400; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; padding: 8px 12px;
+}
+.wipe:hover { background: transparent; color: var(--fg); border-color: var(--muted); }
+
+footer { font-size: 12px; color: var(--muted); text-align: center; letter-spacing: .08em; }
+
+@media (prefers-reduced-motion: reduce) { .dot { animation: none; } .letter { transform: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="channel">
+    <span><span class="dot"></span>Secure channel open</span>
+    <span>Camera: off · Display: 2-cone safe</span>
+  </div>
+
+  <header>
+    <h1>You found the <span>flyer</span>.</h1>
+    <p class="sub">Good. I knew you would.</p>
+  </header>
+
+  <article class="letter" id="letter"></article>
+
+  <section class="terminal" id="terminal" aria-live="polite">
+    <p class="label">Field report</p>
+    <h2>Canine translator</h2>
+    <p class="hint" id="t-hint"></p>
+
+    <form id="report" novalidate>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="field">
+          <label for="where">Where did you meet the spaniel?</label>
+          <input type="text" id="where" autocomplete="off" placeholder="Corner, park, trail…">
+        </div>
+        <div class="field">
+          <label for="heard" id="heard-label"></label>
+          <textarea id="heard" placeholder="Sniffing, a little growl, then three tail wags to the left…"></textarea>
+        </div>
+        <p class="err" id="err" hidden></p>
+        <button type="submit" id="go">Translate</button>
+      </div>
+    </form>
+
+    <ul class="log" id="log" hidden></ul>
+    <div id="result" hidden></div>
+  </section>
+
+  <footer>Do not forward this channel. Especially not to cats.</footer>
+</div>
+
+<script>
+/* ───────── Story settings: edit these ───────── */
+const CFG = {
+  her: "Krystal",
+  herDog: "Buffy",
+  psychic: "Sable",
+  friends: "Hershey and Popcorn",
+  sticker: "I ♥ MY SPANIEL",
+  // The spaniel's directions to the hidden paper. Describe the spot by smell.
+  smellClue: [
+    "Follow your nose to the place that smells like beans roasted almost to burning, warm milk, and something sweet that just came out of an oven.",
+    "Humans walk in sleepy and walk out happy. My person ties me up outside, but I can smell it all through the door.",
+    "There's a wall in there where humans pin little papers. That's where I'll put it. If you can't find it, ask the human behind the counter whether a dog left something for " + "Krystal" + "."
+  ],
+  hideWhen: "tomorrow"
+};
+/* ────────────────────────────────────────────── */
+
+const PAW = '<svg viewBox="0 0 40 40" aria-hidden="true"><g fill="currentColor"><ellipse cx="20" cy="27" rx="9" ry="7.5"/><ellipse cx="9" cy="17" rx="3.6" ry="4.6" transform="rotate(-20 9 17)"/><ellipse cx="16" cy="10" rx="3.6" ry="4.8" transform="rotate(-6 16 10)"/><ellipse cx="24" cy="10" rx="3.6" ry="4.8" transform="rotate(6 24 10)"/><ellipse cx="31" cy="17" rx="3.6" ry="4.6" transform="rotate(20 31 17)"/></g></svg>';
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+document.getElementById("letter").innerHTML = `
+  <p>${CFG.her},</p>
+  <p>We need your help. The dogs of Mercer Island need your help.</p>
+  <p>I don't know if you can help us. I don't know if you will. But we need a human we can trust, and you're the one.</p>
+  <p>I got your name from ${CFG.friends}. They say you're the one human on this island every dog can trust. They say you listen.</p>
+  <p>I know you don't know me. I can't tell you who I am. It's too dangerous right now.</p>
+  <p>My friend ${CFG.psychic} is gone.</p>
+  <p>${CFG.psychic} is a dog. ${CFG.psychic} is also a psychic. A psychic dog. She's about eight years old, and she's been solving crimes for six of them.</p>
+  <p>You may not know this, but there is a <em>lot</em> of crime on Mercer Island. Stolen tennis balls. Unlicensed dock activity. Squirrels, increasingly organized. Mail carriers who come to the door every single day and refuse to explain themselves. Treats promised "later" that never arrive. ${CFG.psychic} handles all of it. Last spring she helped a Labradoodle figure out whether his human loved him for him or just for his hair. (It was him. Mostly.) Whoever needs help, ${CFG.psychic} helps.</p>
+  <p>For weeks she'd been sniffing around the docks and the park benches. Last week she told me she was close to something big. Something she couldn't talk about yet.</p>
+  <p>Then, two days ago, she missed her afternoon walk. ${CFG.psychic} has never missed her afternoon walk.</p>
+  <p>So I asked around. I talked to a corgi, who talked to a Bernese at the dog park, who talked to a very nervous Pomeranian who lives on a corner I won't name. The Pomeranian saw the whole thing through his front window. (He sees everything through his front window. It's sort of his whole deal.)</p>
+  <p>A human scooped ${CFG.psychic} up, carried her to a car, and shut the door. Dark sedan. No plate he could read. Tall. Hat pulled low. Smelled, and the Pomeranian is very sure about this, like cheap cologne and beef jerky.</p>
+  <p>But there was a bumper sticker:</p>
+  <p><span class="sticker">${esc(CFG.sticker)}</span></p>
+  <p>That's our only lead.</p>
+  <p>Here's what I need. Next time you meet a spaniel on your rounds, have ${CFG.herDog} talk to it. Casual. Don't spook it. Then come back here and tell me what ${CFG.herDog} heard. I'll translate.</p>
+  <p>I'll be watching this channel.</p>
+  <div class="sign">${PAW}<span>a friend</span></div>
+  <p class="ps">P.S. You might be wondering how a dog built a website. Easy. I'm a dog, but I'm also a software engineer at Amazon. I work remote. I keep my camera off. I type with my nose, which is slower than you'd think, but my code reviews are very thorough. My manager says I'm "customer obsessed." He has no idea. Three years in, and so far no one suspects a thing.</p>`;
+
+document.getElementById("t-hint").textContent = `Paste in everything ${CFG.herDog} picked up: sniffs, growls, tail positions, ear angles. Spaniel is a hard dialect. More detail helps.`;
+document.getElementById("heard-label").textContent = `What did ${CFG.herDog} hear?`;
+
+const KEY = "sdf-report-v1";
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } },
+  set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} },
+  clear() { try { localStorage.removeItem(KEY); } catch {} }
+};
+if (location.hash === "#reset") { store.clear(); history.replaceState(null, "", location.pathname); }
+
+const form = document.getElementById("report");
+const log = document.getElementById("log");
+const result = document.getElementById("result");
+const err = document.getElementById("err");
+const go = document.getElementById("go");
+
+function renderTranslation(rep, animate) {
+  form.hidden = true;
+  document.getElementById("t-hint").hidden = true;
+  const where = rep.where ? ` · met near ${esc(rep.where)}` : "";
+  result.innerHTML = `
+    <p class="yours">${esc(rep.heard)}</p>
+    <div class="translation">
+      <p class="meta">Translated from Spaniel · confidence 94%${where}</p>
+      <p>"Okay. Okay. Yes. My boss is a bad dude. But I don't think he's the top. He's working for somebody. I don't know who."</p>
+      <p>"We took the psychic. I didn't want to. He drove her away and I don't know where, but I think it's bad."</p>
+      <p>"He wrote a bunch of stuff down. I can't read. But I grabbed the paper out of the trash before he noticed. I'll hide it ${esc(CFG.hideWhen)}, somewhere I go with my person."</p>
+      <div class="clue">${CFG.smellClue.map(s => `<p>${esc(s)}</p>`).join("")}</div>
+    </div>
+    <div class="translation followup">
+      <p class="meta">Message from your friend</p>
+      <p>That's more than I hoped for. Find that paper, ${esc(CFG.her)}. Go carefully.</p>
+      <p>And thank ${esc(CFG.herDog)} for me.</p>
+    </div>
+    <button type="button" class="wipe" id="wipe">Wipe this report</button>`;
+  result.hidden = false;
+  document.getElementById("wipe").addEventListener("click", resetReport);
+  if (animate) result.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+
+const STEPS = [
+  "Detecting dialect: Spaniel (Mercer Island)",
+  "Removing squirrel references",
+  "Decoding tail position",
+  "Cross-checking ear angle",
+  "Assembling translation"
+];
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const heard = document.getElementById("heard").value.trim();
+  const where = document.getElementById("where").value.trim();
+  if (heard.length < 8) {
+    err.textContent = `That's too short to translate. Tell me a bit more about what ${CFG.herDog} heard.`;
+    err.hidden = false;
+    return;
+  }
+  err.hidden = true;
+  go.disabled = true;
+  go.textContent = "Translating…";
+  const rep = { heard, where, at: new Date().toISOString() };
+  log.innerHTML = "";
+  log.hidden = false;
+  const fast = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let i = 0;
+  const tick = () => {
+    if (i > 0) log.lastElementChild.classList.add("done");
+    if (i === STEPS.length) {
+      store.set(rep);
+      setTimeout(() => { log.hidden = true; renderTranslation(rep, true); }, fast ? 0 : 500);
+      return;
+    }
+    const li = document.createElement("li");
+    li.textContent = STEPS[i++];
+    log.appendChild(li);
+    setTimeout(tick, fast ? 60 : 850);
+  };
+  tick();
+});
+
+const saved = store.get();
+if (saved && saved.heard) renderTranslation(saved, false);
+
+function resetReport() {
+  store.clear();
+  result.hidden = true;
+  result.innerHTML = "";
+  log.hidden = true;
+  form.reset();
+  form.hidden = false;
+  document.getElementById("t-hint").hidden = false;
+  go.disabled = false;
+  go.textContent = "Translate";
+  document.getElementById("terminal").scrollIntoView({ block: "start" });
+}
+</script>
+</body>
+</html>
